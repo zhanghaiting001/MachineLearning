@@ -18,13 +18,18 @@ with open('big.txt') as f:
 #print(WORDS['qbwe23'])  #访问的不存在时，返回0 dict时，dict.get(key,default=None),直接dict['qbwe23']会报错
 
 #从WORDS数量来说，构造 距离相近的单词，远比每个计算速度快的多！！！太慢了
-def getNearstWords(string):
+def getNearstWords(string): 
+	"1 迭代得到dict"
 	dis ={}
-	for word, _ in WORDS.items():
+	for word in WORDS:
 		dis[word]=minDistance(string,word)
+	
+	"2 得到dis最小的字典，word:count"
 	sortedDis = sorted(dis.items(),key=lambda d:d[1])
 	#print(sortedDis[:20])
+	#sorted返回的是[('word',dis),()]
 	n = sortedDis[0][1]
+	candidata = []
 	candidate ={}
 	for i in range(len(sortedDis)):
 		if sortedDis[i][1] == n:
@@ -32,8 +37,20 @@ def getNearstWords(string):
 		else:
 			break
 	#print(candidate)
-	sortedCandi = sorted(candidate.items(),key=lambda d:d[1],reverse=True)
-	return sortedCandi[0][0]
+	"3 优化过了，求最大count的word"
+	return max(candidate,key=lambda x:candidate[x])  
+	#sortedCandi = sorted(candidate.items(),key=lambda d:d[1],reverse=True)
+	#return sortedCandi[0][0]
+
+
+def getNearstWordsNew(string): #new 0.940 上面0.922
+	"1 用字典解析式"
+	dis ={word:minDistance(string,word) for word in WORDS}
+	"2 得到dis最小的列表word ，这个字典太大，可能不如上面排序取前面值效果好,不过时间主要在minDistance,所以暂时不细究了"
+	minDis = min(dis.values())
+	candidate = [word for word,dis in dis.items() if dis==minDis]
+	"3 得到最大count的word"
+	return max(candidate,key=lambda x:WORDS[x])
 
 
 def minDistance(word1,word2):
@@ -71,14 +88,14 @@ def spelltest(tests, verbose=False):
     n = len(tests)
     for right, wrong in tests:
         w = test(wrong)
-        good += (w == right)
+        good += (w == right)  #True +1
         if w != right:
             unknown += (right not in WORDS)
             if verbose:
                 print('correction({}) => {} ({}); expected {} ({})'
                       .format(wrong, w, WORDS[w], right, WORDS[right]))
     dt = time.clock() - start
-    print('{:.0%} of {} correct ({:.0%} unknown) at {:.0f} words per second '
+    print('{:.0%} of {} correct ({:.0%} unknown) at {:.3f} words per second '
           .format(good / n, n, unknown / n, n / dt))
 
 def Testset(lines):
@@ -86,7 +103,14 @@ def Testset(lines):
     return [(right, wrong)
             for (right, wrongs) in (line.split(':') for line in lines)
             for wrong in wrongs.split()]
-
+    '''
+    word_pairs=[]
+    for line in lines:
+    	for right,wrongs in line.split(':'):
+    		for wrong in wrongs:
+    			word_pairs.append((right,wrong))
+    return word_pairs
+    '''
 
 
 if __name__ == '__main__':
@@ -102,5 +126,5 @@ if __name__ == '__main__':
 	print(test('peotryy')) #petya 应该poetry
 	print(test('word'))  
 	print(test('quintessential'))  #essential  #距离大于2可以不判断了
-	spelltest(Testset(open('spell-testset1.txt')))
+	spelltest(Testset(open('spell-testset1.txt')),verbose=False)
 	#spelltest(Testset(open('spell-testset2.txt')))

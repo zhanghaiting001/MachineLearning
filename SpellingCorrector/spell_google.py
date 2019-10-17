@@ -13,9 +13,9 @@ def words(text): return re.findall(r'\w+', text.lower())
 
 WORDS = Counter(words(open('big.txt').read()))
 
-def P(word, N=sum(WORDS.values())): #sum() 会不会每次执行？？
+def P(word, N=sum(WORDS.values())): #sum() 不会每次执行,不影响速度
     "Probability of `word`." #这就是一行字符串，只是运行一下，不影响任何变量，不建议这样注释
-    return WORDS[word] / N  #去掉N速度基本也没有什么提升。
+    return WORDS[word] / N
 
 def correction(word): 
     "Most probable spelling correction for word."
